@@ -10,14 +10,15 @@ pipeline {
         DOCKERHUB_CRED_ID = 'dockerhub-pcata-id' 
     }
 
-    stages {
+    stages { 
+
         stage('Checkout Code') {
             steps {
                 echo "Clono il codice su agent ..."
                 checkout scm 
             }
         }
-    }
+    
         stage('Set Image Tag') {
             steps {
                 script {
@@ -34,12 +35,11 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Buildo l'immagine ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}..."
-                
                 bash "docker build --target ${env.BUILD_TARGET} -t ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG} ."
             }
         }
     
-        stage('Push to Docker Hub') { // <-- DEFINIZIONE DELLA FASE AGGIUNTA
+        stage('Push to Docker Hub') {
             steps {
                 script {
                     withCredentials([usernamePassword(
@@ -54,16 +54,16 @@ pipeline {
                         bash "docker push ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}"
                         
                         bash "docker logout"
+                    }
+                }
             }
         }
         
         stage('Cleanup') {
             steps {
                 echo 'Cleaning up local image from agent...'
-                // Rimuove l'immagine Docker creata sull'Agente dopo il push
                 bash "docker rmi ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}"
             }
         }
-    }
-  }
-}
+    } 
+} 
