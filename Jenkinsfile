@@ -17,7 +17,7 @@ pipeline {
                 checkout scm 
             }
         }
-
+    }
         stage('Set Image Tag') {
             steps {
                 script {
