@@ -3,7 +3,7 @@ pipeline {
         label 'jenkins-agent-02'
     }
 
-    env {
+    environment {
         DOCKER_HUB_USER = 'pcata'
         IMAGE_NAME = "flask-app-example"
         BUILD_TARGET = 'builder'
