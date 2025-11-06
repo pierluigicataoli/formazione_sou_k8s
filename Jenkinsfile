@@ -35,7 +35,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Buildo l'immagine ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}..."
-                bash "docker build --target ${env.BUILD_TARGET} -t ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG} ."
+                sh "docker build --target ${env.BUILD_TARGET} -t ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG} ."
             }
         }
     
@@ -48,12 +48,12 @@ pipeline {
                         passwordVariable: 'DOCKER_PASSWORD'
                     )]) {
                         echo "Logging into Docker Hub and pushing image..."
+                       
+                        sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
                         
-                        bash "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
+                        sh "docker push ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}"
                         
-                        bash "docker push ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}"
-                        
-                        bash "docker logout"
+                        sh "docker logout"
                     }
                 }
             }
@@ -62,7 +62,7 @@ pipeline {
         stage('Cleanup') {
             steps {
                 echo 'Cleaning up local image from agent...'
-                bash "docker rmi ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}"
+                sh "docker rmi ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}"
             }
         }
     } 
