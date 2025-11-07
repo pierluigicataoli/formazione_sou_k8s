@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "flask-app-chart.fullname" . }}-deployment
+  labels:
+    {{- include "flask-app-chart.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "flask-app-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "flask-app-chart.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          # Costruisce il nome dell'immagine usando Repository e Tag da values.yaml
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              # Assicurati che questa sia la porta esposta dall'app Flask (di solito 5000)
+              containerPort: 5000
+              protocol: TCP
+          # Aggiungi qui altre configurazioni come health checks o limiti di risorse

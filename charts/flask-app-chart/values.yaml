@@ -1,0 +1,20 @@
+# Specifica l'immagine Docker da distribuire.
+image:
+  # Usa il nome dell'immagine creata dalla tua pipeline
+  repository: flask-app-example-build 
+  
+  # Questo è il valore cruciale che l'utente può sovrascrivere.
+  # Ad esempio, 'latest' o un hash di commit specifico.
+  tag: latest 
+  
+  # Strategia di pull dell'immagine
+  pullPolicy: IfNotPresent
+
+# Numero di repliche
+replicaCount: 2
+
+# Configurazione del Service Kubernetes (come esporre l'app)
+service:
+  type: LoadBalancer # o ClusterIP se non vuoi che sia accessibile dall'esterno
+  port: 80
+  targetPort: 5000 # Porta predefinita di un'app Flask

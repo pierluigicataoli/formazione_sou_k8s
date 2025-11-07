@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "flask-app-chart.fullname" . }}-service
+  labels:
+    {{- include "flask-app-chart.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      # TargetPort deve corrispondere alla containerPort definita nel Deployment (5000)
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "flask-app-chart.selectorLabels" . | nindent 4 }}
