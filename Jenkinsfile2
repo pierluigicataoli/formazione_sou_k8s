@@ -1,0 +1,64 @@
+pipeline {
+    // Definizione dell'agente Kubernetes per eseguire i comandi Helm e Git
+    agent {
+        kubernetes {
+            // Container sidecar con Helm e Kubectl (necessario per il deploy)
+            yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: formazione-sou
+spec:
+  containers:
+  - name: jnlp
+    image: jenkins/inbound-agent:4.11.2-4 
+  - name: helm-kubectl
+    image: bitnami/kubectl:1.29.3 
+    command: ['cat']
+    tty: true
+"""
+            defaultContainer 'helm-kubectl'
+            namespace 'formazione-sou' // Namespace configurato nel Cloud Jenkins
+        }
+    }
+    
+    // 2. Definizione delle variabili d'ambiente
+    environment {
+        // Namespace di destinazione nel cluster K8s
+        K8S_NAMESPACE = 'formazione-sou'
+        // Percorso relativo alla root del repository (il chart è qui)
+        CHART_PATH = 'formazione_sou_k8s' 
+        // Nome della release di Helm
+        HELM_RELEASE_NAME = 'sou-app-release' 
+        // URL del repository GitHub
+        GIT_REPO_URL = 'https://github.com/pierluigicataoli/formazione_sou_k8s.git' 
+        GIT_CREDENTIALS_ID = 'github-token-pierluigi' 
+    }
+
+    // 3. Stage
+    stages {
+        stage('Checkout & Setup') {
+            steps {
+                echo "Esecuzione deploy nel namespace: ${K8S_NAMESPACE}"
+                
+                // Clona il repository GitHub
+                git credentialsId: env.GIT_CREDENTIALS_ID, url: env.GIT_REPO_URL
+            }
+        }
+
+        stage('Helm Deploy') {
+            steps {
+                // Esegue l'installazione o l'aggiornamento (upgrade) del chart Helm
+                // Punta al percorso CHART_PATH all'interno della directory di lavoro
+                sh """
+                helm upgrade --install \
+                    ${HELM_RELEASE_NAME} \
+                    ./${CHART_PATH} \
+                    --namespace ${K8S_NAMESPACE} \
+                    --atomic \
+                    --wait
+                """
+            }
+        }
+    }
+}
