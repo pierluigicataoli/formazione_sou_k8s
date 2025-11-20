@@ -13,7 +13,7 @@ spec:
   - name: jnlp
     image: jenkins/inbound-agent:4.11.2-4 
   - name: helm-kubectl
-    image: bitnami/kubectl:1.29.3 
+    image: jenkins/jnlp-agent-kubectl-helm:4.11.2-4 
     command: ['cat']
     tty: true
 """
