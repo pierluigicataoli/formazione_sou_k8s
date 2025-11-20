@@ -41,8 +41,6 @@ spec:
             steps {
                 echo "Esecuzione deploy nel namespace: ${K8S_NAMESPACE}"
                 
-                // Clona il repository GitHub
-                git credentialsId: env.GIT_CREDENTIALS_ID, url: env.GIT_REPO_URL
             }
         }
 
