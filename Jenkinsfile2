@@ -13,7 +13,7 @@ spec:
   - name: jnlp
     image: jenkins/inbound-agent:latest
   - name: helm-kubectl
-    image: bitnami/kubectl:latest 
+    image: alpine/helm:latest
     command: ['cat']
     tty: true
 """
