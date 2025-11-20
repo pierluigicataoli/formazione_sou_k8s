@@ -11,9 +11,9 @@ metadata:
 spec:
   containers:
   - name: jnlp
-    image: jenkins/inbound-agent:4.11.2-4 
+    image: jenkins/inbound-agent:latest
   - name: helm-kubectl
-    image: jenkins/jnlp-agent-kubectl-helm:4.11.2-4 
+    image: bitnami/kubectl:latest 
     command: ['cat']
     tty: true
 """
