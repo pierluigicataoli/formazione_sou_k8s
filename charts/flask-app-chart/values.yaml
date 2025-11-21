@@ -22,3 +22,8 @@ service:
   # Questa proprietà 'create' è quella che mancava. 
   # Senza di essa, il template ServiceAccount non riesce a leggere '.create'.
   create: true
+ingress:
+  enabled: false 
+  className: ""
+  annotations: {}
+  hosts: []
