@@ -47,6 +47,7 @@ spec:
 
         stage('Helm Deploy') {
             steps {
+                dir("${WORKSPACE}") {
                 // Esegue l'installazione o l'aggiornamento (upgrade) del chart Helm
                 // Punta al percorso CHART_PATH all'interno della directory di lavoro
                 sh """
@@ -57,6 +58,7 @@ spec:
                     --atomic \
                     --wait
                 """
+               }
             }
         }
     }
