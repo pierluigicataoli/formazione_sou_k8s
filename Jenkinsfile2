@@ -13,12 +13,12 @@ spec:
   volumes:
   - name: docker-socket
     hostPath:
-      path: /var/run/docker.sock // Mappa il socket del Docker Daemon dell'host (Minikube VM)
+      path: /var/run/docker.sock 
   containers:
   - name: jnlp
     image: jenkins/inbound-agent:latest
   - name: helm-kubectl
-    image: bitnami/kubectl:latest // Immagine più affidabile per kubectl/helm
+    image: bitnami/kubectl:latest 
     command: ['cat']
     tty: true
   - name: docker-cli
@@ -27,7 +27,7 @@ spec:
     tty: true
     volumeMounts:
     - name: docker-socket
-      mountPath: /var/run/docker.sock // Monta il socket nella posizione attesa dal client Docker
+      mountPath: /var/run/docker.sock 
 """
             namespace 'formazione-sou'
         }
