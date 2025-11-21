@@ -53,6 +53,9 @@ spec:
     stages {
         stage('Checkout & Setup') {
             steps {
+                script {
+                    checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: env.GIT_CREDENTIALS_ID, url: env.GIT_REPO_URL]]])
+                }
                 echo "Esecuzione deploy nel namespace: ${K8S_NAMESPACE}"
             }
         }
