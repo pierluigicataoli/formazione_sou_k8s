@@ -10,6 +10,10 @@ metadata:
   namespace: formazione-sou
 spec:
   serviceAccountName: jenkins-sa
+  volumes:
+  - name: docker-socket
+    hostPath:
+      path: /var/run/docker.sock
   containers:
   - name: jnlp
     image: jenkins/inbound-agent:latest
@@ -21,6 +25,9 @@ spec:
     image: docker:cli 
     command: ['cat']
     tty: true
+    volumeMounts:
+    - name: docker-socket
+      mountPath: /var/run/docker.sock
 """
             namespace 'formazione-sou' // Namespace configurato nel Cloud Jenkins
         }
