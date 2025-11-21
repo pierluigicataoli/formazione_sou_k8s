@@ -1,5 +1,5 @@
 pipeline {
-    // Definizione dell'agente Kubernetes per eseguire i comandi Helm e Git
+    // Definizione dell'agente Kubernetes per eseguire i comandi
     agent {
         kubernetes {
             // Container sidecar con Helm, Kubectl e il client Docker
@@ -13,47 +13,44 @@ spec:
   volumes:
   - name: docker-socket
     hostPath:
-      path: /var/run/docker.sock
+      path: /var/run/docker.sock // Mappa il socket del Docker Daemon dell'host (Minikube VM)
   containers:
   - name: jnlp
     image: jenkins/inbound-agent:latest
   - name: helm-kubectl
-    image: alpine/helm:latest
+    image: bitnami/kubectl:latest // Immagine più affidabile per kubectl/helm
     command: ['cat']
     tty: true
-  - name: docker-cli 
-    image: docker:cli 
+  - name: docker-cli
+    image: docker:cli
     command: ['cat']
     tty: true
     volumeMounts:
     - name: docker-socket
-      mountPath: /var/run/docker.sock
+      mountPath: /var/run/docker.sock // Monta il socket nella posizione attesa dal client Docker
 """
-            namespace 'formazione-sou' // Namespace configurato nel Cloud Jenkins
+            namespace 'formazione-sou'
         }
     }
 
-    // 2. Definizione delle variabili d'ambiente
+    // Variabili d'ambiente
     environment {
-        // Namespace di destinazione nel cluster K8s
         K8S_NAMESPACE = 'formazione-sou'
-        // Percorso relativo alla root del repository (il chart è qui)
         CHART_PATH = 'charts/flask-app-chart'
-        // Nome della release di Helm
         HELM_RELEASE_NAME = 'sou-app-release'
-        // URL del repository GitHub
-        GIT_REPO_URL = 'https://github.pierluigicataoli/formazione_sou_k8s.git'
+        GIT_REPO_URL = 'https://github.com/pierluigicataoli/formazione_sou_k8s.git'
         GIT_CREDENTIALS_ID = 'github-token-pierluigi'
-        // Variabili necessarie per la build Docker
         IMAGE_NAME = 'flask-app-example-build'
         IMAGE_TAG = 'latest'
     }
 
-    // 3. Stage
+    // Stage
     stages {
         stage('Checkout & Setup') {
             steps {
                 script {
+                    // *** CHECKOUT ESPLICITO SPOSTATO QUI ***
+                    // Questo garantisce che i file siano scaricati nella cartella di lavoro visibile a tutti i container sidecar.
                     checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: env.GIT_CREDENTIALS_ID, url: env.GIT_REPO_URL]]])
                 }
                 echo "Esecuzione deploy nel namespace: ${K8S_NAMESPACE}"
@@ -62,46 +59,42 @@ spec:
 
         stage('Docker Build & Load') {
             steps {
-                // 1. BUILD DOCKER: Costruisce l'immagine
                 container('docker-cli') {
                     sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
                 }
-
             }
         }
 
         stage('Helm Deploy') {
             steps {
                 container('helm-kubectl') {
-                    // Esegue l'installazione o l'aggiornamento (upgrade) del chart Helm
+                    // Esegue l'installazione o l'aggiornamento del chart Helm senza --wait
                     sh """
                     helm upgrade --install \\
                         ${HELM_RELEASE_NAME} \\
                         ./${CHART_PATH} \\
-                        --namespace ${K8S_NAMESPACE} \\
+                        --namespace ${K8S_NAMESPACE}
                     """
                 }
             }
         }
-         stage('Quality Gates') {
+        
+        // =================================================================
+        // NUOVO STAGE: Quality Gates
+        // =================================================================
+        stage('Quality Gates') {
             steps {
                 container('helm-kubectl') {
                     // 1. Rendiamo lo script eseguibile
                     sh 'chmod +x check_deployment.sh'
                     
-                    // 2. Installiamo jq (processore JSON da riga di comando)
-                    // Nota: 'bitnami/kubectl' usa bash, non apk, quindi usiamo apt/microdnf
-                    // Per sicurezza, usiamo ancora apk, che è spesso disponibile sulle immagini lightweight:
+                    // 2. Installiamo jq (necessario per l'analisi JSON)
                     sh 'apk add --no-cache jq' 
                     
                     // 3. Eseguiamo il controllo. Fallirà se mancano i parametri.
                     sh './check_deployment.sh'
-
-               }
-
-          }
-
-      }
-   }
+                }
+            }
+        }
+    }
 }
-
