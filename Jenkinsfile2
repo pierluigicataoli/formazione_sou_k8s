@@ -89,6 +89,7 @@ spec:
         stage('Quality Gates') {
             steps {
                 container('helm-kubectl') {
+                    dir('.') {
                     // 1. Rendiamo lo script eseguibile
                     sh 'chmod +x script_5'
                     
@@ -97,6 +98,7 @@ spec:
                     
                     // 3. Eseguiamo il controllo. Fallirà se mancano i parametri.
                     sh './script_5'
+                  }
                 }
             }
         }
