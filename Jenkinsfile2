@@ -17,6 +17,10 @@ spec:
     image: alpine/helm:latest
     command: ['cat']
     tty: true
+  - name: docker-cli // <<<  CONTAINER PER LA BUILD DOCKER
+    image: docker:20.10.16-cli // Immagine con client Docker
+    command: ['cat']
+    tty: true
 """
             namespace 'formazione-sou' // Namespace configurato nel Cloud Jenkins
         }
@@ -44,6 +48,21 @@ spec:
             }
         }
 
+        stage('Docker Build & Load') {
+            steps {
+                // 1. BUILD DOCKER: Usiamo il nuovo container docker-cli per la build
+                container('docker-cli') { 
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                }
+                
+                // 2. LOAD IMMAGINE: Usiamo il container helm-kubectl per caricare l'immagine 
+                // nel registry interno di Minikube, assumendo che kubectl/helm abbiano minikube client.
+                // **ATTENZIONE:** Questo passaggio è efficace solo se l'immagine Helm-Kubectl ha anche il client 'minikube' installato.
+                container('helm-kubectl') {
+                    sh "minikube image load ${IMAGE_NAME}:${IMAGE_TAG}
+                }
+          }
+
         stage('Helm Deploy') {
             steps {
                 container('helm-kubectl') {
@@ -61,5 +80,6 @@ spec:
                }
             }
         }
-    }
+    } 
+  }
 }
