@@ -64,12 +64,6 @@ spec:
                     sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
                 }
 
-                // 2. LOAD IMMAGINE: Carica l'immagine nel registry di Minikube.
-                // Richiede che il client minikube sia disponibile nel path del container helm-kubectl.
-                // Se fallisce, devi usare un'immagine custom per 'helm-kubectl' che includa anche 'minikube'.
-                container('helm-kubectl') {
-                    sh "minikube image load ${IMAGE_NAME}:${IMAGE_TAG}"
-                }
             }
         }
 
