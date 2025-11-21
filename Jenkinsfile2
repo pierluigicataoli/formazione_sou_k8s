@@ -80,5 +80,24 @@ spec:
                 }
             }
         }
-    }
+         stage('Quality Gates') {
+            steps {
+                container('helm-kubectl') {
+                    // 1. Rendiamo lo script eseguibile
+                    sh 'chmod +x check_deployment.sh'
+                    
+                    // 2. Installiamo jq (processore JSON da riga di comando)
+                    // Nota: 'bitnami/kubectl' usa bash, non apk, quindi usiamo apt/microdnf
+                    // Per sicurezza, usiamo ancora apk, che è spesso disponibile sulle immagini lightweight:
+                    sh 'apk add --no-cache jq' 
+                    
+                    // 3. Eseguiamo il controllo. Fallirà se mancano i parametri.
+                    sh './check_deployment.sh
+
+               }
+
+          }
+
+      }
+   }
 }
