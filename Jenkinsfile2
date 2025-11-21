@@ -27,7 +27,7 @@ spec:
         // Namespace di destinazione nel cluster K8s
         K8S_NAMESPACE = 'formazione-sou'
         // Percorso relativo alla root del repository (il chart è qui)
-        CHART_PATH = 'formazione_sou_k8s' 
+        CHART_PATH = 'charts/flask-app-chart' 
         // Nome della release di Helm
         HELM_RELEASE_NAME = 'sou-app-release' 
         // URL del repository GitHub
