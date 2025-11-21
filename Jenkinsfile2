@@ -92,7 +92,7 @@ spec:
                     sh 'apk add --no-cache jq' 
                     
                     // 3. Eseguiamo il controllo. Fallirà se mancano i parametri.
-                    sh './check_deployment.sh
+                    sh './check_deployment.sh'
 
                }
 
