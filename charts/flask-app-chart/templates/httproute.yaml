@@ -1,3 +1,4 @@
+{{- if .Values.httpRoute }}
 {{- if .Values.httpRoute.enabled -}}
 {{- $fullName := include "flask-app-chart.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
@@ -35,4 +36,5 @@ spec:
           port: {{ $svcPort }}
           weight: 1
     {{- end }}
+{{- end }}
 {{- end }}

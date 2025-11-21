@@ -27,3 +27,5 @@ ingress:
   className: ""
   annotations: {}
   hosts: []
+httpRoute:
+  enabled: false
