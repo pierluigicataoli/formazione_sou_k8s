@@ -18,3 +18,7 @@ service:
   type: LoadBalancer # o ClusterIP se non vuoi che sia accessibile dall'esterno
   port: 80
   targetPort: 5000 # Porta predefinita di un'app Flask
+  serviceAccount:
+  # Questa proprietà 'create' è quella che mancava. 
+  # Senza di essa, il template ServiceAccount non riesce a leggere '.create'.
+  create: true
