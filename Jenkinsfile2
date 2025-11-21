@@ -18,7 +18,7 @@ spec:
     command: ['cat']
     tty: true
   - name: docker-cli // Container per la build Docker
-    image: docker:20.10.16-cli // Immagine con client Docker
+    image: docker:20.10.16-cli 
     command: ['cat']
     tty: true
 """
