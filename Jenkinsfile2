@@ -2,7 +2,7 @@ pipeline {
     // Definizione dell'agente Kubernetes per eseguire i comandi Helm e Git
     agent {
         kubernetes {
-            // Container sidecar con Helm e Kubectl (necessario per il deploy)
+            // Container sidecar con Helm, Kubectl e il client Docker
             yaml """
 apiVersion: v1
 kind: Pod
@@ -17,26 +17,29 @@ spec:
     image: alpine/helm:latest
     command: ['cat']
     tty: true
-  - name: docker-cli // <<<  CONTAINER PER LA BUILD DOCKER
-    image: docker:20.10.16-cli // Immagine con client Docker
-    command: ['cat']
-    tty: true
+  - name: docker-cli // Container per la build Docker
+    image: docker:20.10.16-cli // Immagine con client Docker
+    command: ['cat']
+    tty: true
 """
             namespace 'formazione-sou' // Namespace configurato nel Cloud Jenkins
         }
     }
-    
+
     // 2. Definizione delle variabili d'ambiente
     environment {
         // Namespace di destinazione nel cluster K8s
         K8S_NAMESPACE = 'formazione-sou'
         // Percorso relativo alla root del repository (il chart è qui)
-        CHART_PATH = 'charts/flask-app-chart' 
+        CHART_PATH = 'charts/flask-app-chart'
         // Nome della release di Helm
-        HELM_RELEASE_NAME = 'sou-app-release' 
+        HELM_RELEASE_NAME = 'sou-app-release'
         // URL del repository GitHub
-        GIT_REPO_URL = 'https://github.com/pierluigicataoli/formazione_sou_k8s.git' 
-        GIT_CREDENTIALS_ID = 'github-token-pierluigi' 
+        GIT_REPO_URL = 'https://github.luigicataoli/formazione_sou_k8s.git'
+        GIT_CREDENTIALS_ID = 'github-token-pierluigi'
+        // Variabili necessarie per la build Docker
+        IMAGE_NAME = 'flask-app-example-build'
+        IMAGE_TAG = 'latest'
     }
 
     // 3. Stage
@@ -44,41 +47,40 @@ spec:
         stage('Checkout & Setup') {
             steps {
                 echo "Esecuzione deploy nel namespace: ${K8S_NAMESPACE}"
-                
             }
         }
 
         stage('Docker Build & Load') {
             steps {
-                 // 1. BUILD DOCKER: Usiamo il nuovo container docker-cli per la build
-                  container('docker-cli') { 
+                // 1. BUILD DOCKER: Costruisce l'immagine
+                container('docker-cli') {
                     sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                   }
-                 // 2. LOAD IMMAGINE: Usiamo il container helm-kubectl per caricare l'immagine 
-                 // nel registry interno di Minikube, assumendo che kubectl/helm abbiano minikube client.
-                 // **ATTENZIONE:** Questo passaggio è efficace solo se l'immagine Helm-Kubectl ha anche il client 'minikube' installato.
-                    container('helm-kubectl') {
-                    sh "minikube image load ${IMAGE_NAME}:${IMAGE_TAG}
-                  }
-           }
+                }
+
+                // 2. LOAD IMMAGINE: Carica l'immagine nel registry di Minikube.
+                // Richiede che il client minikube sia disponibile nel path del container helm-kubectl.
+                // Se fallisce, devi usare un'immagine custom per 'helm-kubectl' che includa anche 'minikube'.
+                container('helm-kubectl') {
+                    sh "minikube image load ${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
 
         stage('Helm Deploy') {
             steps {
                 container('helm-kubectl') {
-                // Esegue l'installazione o l'aggiornamento (upgrade) del chart Helm
-                // Punta al percorso CHART_PATH all'interno della directory di lavoro
-                sh """
-                helm upgrade --install \
-                    ${HELM_RELEASE_NAME} \
-                    ./${CHART_PATH} \
-                    --namespace ${K8S_NAMESPACE} \
-                    --atomic \
-                    --wait
-                    --timeout 10m
-                """
-               }
+                    // Esegue l'installazione o l'aggiornamento (upgrade) del chart Helm
+                    sh """
+                    helm upgrade --install \\
+                        ${HELM_RELEASE_NAME} \\
+                        ./${CHART_PATH} \\
+                        --namespace ${K8S_NAMESPACE} \\
+                        --atomic \\
+                        --wait \\
+                        --timeout 10m
+                    """
+                }
             }
         }
-    } 
-  }
+    }
 }
