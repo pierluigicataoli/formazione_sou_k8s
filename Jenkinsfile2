@@ -18,7 +18,7 @@ spec:
   - name: jnlp
     image: jenkins/inbound-agent:latest
   - name: helm-kubectl
-    image: bitnami/kubectl:latest 
+    image: alpine:latest 
     command: ['cat']
     tty: true
   - name: docker-cli
@@ -71,6 +71,7 @@ spec:
             }
             steps {
                 container('helm-kubectl') {
+                    sh 'apk update && apk add --no-cache curl helm kubectl'
                     // Esegue l'installazione o l'aggiornamento del chart Helm senza --wait
                     sh """
                     helm upgrade --install \\
