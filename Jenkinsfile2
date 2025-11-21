@@ -66,6 +66,9 @@ spec:
         }
 
         stage('Helm Deploy') {
+                    options {
+                retry(2) 
+            }
             steps {
                 container('helm-kubectl') {
                     // Esegue l'installazione o l'aggiornamento del chart Helm senza --wait
