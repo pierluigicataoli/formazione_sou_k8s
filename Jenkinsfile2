@@ -90,13 +90,13 @@ spec:
             steps {
                 container('helm-kubectl') {
                     // 1. Rendiamo lo script eseguibile
-                    sh 'chmod +x check_deployment.sh'
+                    sh 'chmod +x script_5'
                     
                     // 2. Installiamo jq (necessario per l'analisi JSON)
                     sh 'apk add --no-cache jq' 
                     
                     // 3. Eseguiamo il controllo. Fallirà se mancano i parametri.
-                    sh './check_deployment.sh'
+                    sh './script_5'
                 }
             }
         }
