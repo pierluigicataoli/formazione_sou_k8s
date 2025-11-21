@@ -25,3 +25,23 @@ spec:
               containerPort: 5000
               protocol: TCP
           # Aggiungi qui altre configurazioni come health checks o limiti di risorse
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          # 2. Configurazione Probes (Liveness e Readiness)
+          # Vengono aggiunti solo se 'probes.enabled' è true in values.yaml
+          {{- if .Values.probes.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.liveness.path }}
+              port: {{ .Values.probes.liveness.port }}
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+          
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readiness.path }}
+              port: {{ .Values.probes.readiness.port }}
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+          {{- end }}

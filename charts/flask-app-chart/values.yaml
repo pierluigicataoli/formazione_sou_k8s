@@ -38,3 +38,27 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 3
   targetCPUUtilizationPercentage: 80
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# 2. Probes (Liveness e Readiness)
+# Queste configurazioni permettono a Kubernetes di sapere se l'app è viva e pronta a ricevere traffico.
+probes:
+  enabled: true
+  
+  liveness:
+    path: /
+    port: http # Deve corrispondere al nome della porta nel deployment
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    
+  readiness:
+    path: /
+    port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
