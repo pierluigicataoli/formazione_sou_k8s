@@ -9,6 +9,7 @@ kind: Pod
 metadata:
   namespace: formazione-sou
 spec:
+  serviceAccountName: jenkins-sa
   containers:
   - name: jnlp
     image: jenkins/inbound-agent:latest
