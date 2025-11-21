@@ -17,7 +17,7 @@ spec:
     image: alpine/helm:latest
     command: ['cat']
     tty: true
-  - name: docker-cli // Container per la build Docker
+  - name: docker-cli 
     image: docker:20.10.16-cli 
     command: ['cat']
     tty: true
