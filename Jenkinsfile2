@@ -94,7 +94,7 @@ spec:
                     sh 'chmod +x script_5'
                     
                     // 2. Installiamo jq (necessario per l'analisi JSON)
-                    sh 'apk add --no-cache jq' 
+                    sh 'apk update && apk add --no-cache jq bash' 
                     
                     // 3. Eseguiamo il controllo. Fallirà se mancano i parametri.
                     sh './script_5'
