@@ -18,7 +18,7 @@ spec:
     command: ['cat']
     tty: true
   - name: docker-cli 
-    image: docker:20.10.16-cli 
+    image: docker:cli 
     command: ['cat']
     tty: true
 """
