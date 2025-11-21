@@ -76,9 +76,6 @@ spec:
                         ${HELM_RELEASE_NAME} \\
                         ./${CHART_PATH} \\
                         --namespace ${K8S_NAMESPACE} \\
-                        --atomic \\
-                        --wait \\
-                        --timeout 10m
                     """
                 }
             }
