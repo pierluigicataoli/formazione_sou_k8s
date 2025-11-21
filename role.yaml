@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: jenkins-role
+  namespace: formazione-sou
+rules:
+- apiGroups: ["core"] # 
+  resources: ["pods", "services", "configmaps", "secrets"]
+  verbs: ["*"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["*"]
+# Aggiungi altre risorse/apiGroups se necessario (es. batch per Jobs, networking.k8s.io per Ingress)
