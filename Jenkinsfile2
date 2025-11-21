@@ -42,7 +42,7 @@ spec:
         // Nome della release di Helm
         HELM_RELEASE_NAME = 'sou-app-release'
         // URL del repository GitHub
-        GIT_REPO_URL = 'https://github.luigicataoli/formazione_sou_k8s.git'
+        GIT_REPO_URL = 'https://github.pierluigicataoli/formazione_sou_k8s.git'
         GIT_CREDENTIALS_ID = 'github-token-pierluigi'
         // Variabili necessarie per la build Docker
         IMAGE_NAME = 'flask-app-example-build'
