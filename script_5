@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Configurazione
+NAMESPACE="formazione-sou"
+DEPLOYMENT_NAME="sou-app-release-flask-app-chart-deployment"
+ATTRIBUTES_MISSING=0
+MISSING_LIST=()
+CONTAINER_PATH=".spec.template.spec.containers[0]"
+
+echo "--- 1. Verifica Dipendenze (kubectl e jq) ---"
+command -v kubectl >/dev/null 2>&1 || { echo >&2 "Errore: kubectl non trovato."; exit 1; }
+command -v jq >/dev/null 2>&1 || { echo >&2 "Errore: jq non trovato."; exit 1; }
+
+echo ""
+echo "--- 2. Esportazione Deployment (${DEPLOYMENT_NAME}) ---"
+
+# Recupera la configurazione Deployment in JSON
+DEPLOYMENT_JSON=$(kubectl get deployment "${DEPLOYMENT_NAME}" -n "${NAMESPACE}" -o json)
+
+if [ $? -ne 0 ]; then
+    echo "Errore: Impossibile recuperare il Deployment. Controlla RBAC o nome."
+    exit 1
+fi
+
+echo "${DEPLOYMENT_JSON}" | jq .
+
+echo ""
+echo "--- 3. Esecuzione Controlli di Qualità ---"
+
+# Funzione per controllare la presenza di un attributo
+check_attribute() {
+    local JQ_PATH=$1
+    local ATTRIBUTE_NAME=$2
+    local RESULT=$(echo "${DEPLOYMENT_JSON}" | jq -r "${JQ_PATH}")
+
+    if [ "${RESULT}" = "null" ] || [ -z "${RESULT}" ]; then
+        echo "  MANCANTE: ${ATTRIBUTE_NAME}"
+        ATTRIBUTES_MISSING=1
+        MISSING_LIST+=("${ATTRIBUTE_NAME}")
+    else
+        echo "  PRESENTE: ${ATTRIBUTE_NAME}"
+    fi
+}
+
+# Esecuzione dei controlli richiesti
+check_attribute "${CONTAINER_PATH}.livenessProbe" "Liveness Probe"
+check_attribute "${CONTAINER_PATH}.readinessProbe" "Readiness Probe"
+check_attribute "${CONTAINER_PATH}.resources.limits" "Resource Limits"
+check_attribute "${CONTAINER_PATH}.resources.requests" "Resource Requests"
+
+echo ""
+
+# Risultato Finale
+if [ "${ATTRIBUTES_MISSING}" -eq 1 ]; then
+    echo " VERIFICA FALLITA: Trovati attributi mancanti: ${MISSING_LIST[*]}"
+    exit 1
+else
+    echo " VERIFICA SUPERATA: Tutti gli attributi critici sono presenti."
+    exit 0
+fi
