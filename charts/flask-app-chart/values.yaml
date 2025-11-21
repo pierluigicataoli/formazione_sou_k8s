@@ -29,3 +29,12 @@ ingress:
   hosts: []
 httpRoute:
   enabled: false
+autoscaling:
+  # 'enabled' è la proprietà che mancava. 
+  # Impostalo su 'false' se non vuoi usare l'autoscaling.
+  enabled: false 
+  
+  # Aggiungi qui le proprietà min/max che il template si aspetta (anche se disabilitato)
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
